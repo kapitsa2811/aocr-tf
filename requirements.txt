@@ -1,0 +1,7 @@
+setuptools
+six
+numpy
+tensorflow==1.*
+Pillow
+distance
+matplotlib
