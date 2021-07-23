@@ -243,8 +243,8 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
         #     attns, attn_weights = attention(initial_state)
         #     attention_weights_history.append(attn_weights)
         #     # MODIFIED ADD END
-        # tfprint = lambda x,l : tf.Print(x,[tf.shape(x),x[0][:5],x[0][-5:]],l,summarize=5)
-        tfprint = lambda x,l : x
+        tfprint = lambda x,l : tf.Print(x,[tf.shape(x),x[0][:5],x[0][-5:]],l,summarize=5)
+        # tfprint = lambda x,l : x
         for i, inp in enumerate(decoder_inputs):
             if i > 0:
                 tf.get_variable_scope().reuse_variables()
