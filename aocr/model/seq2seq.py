@@ -76,6 +76,9 @@ except AttributeError:
     from tensorflow.contrib.rnn.python.ops import core_rnn_cell
     linear = core_rnn_cell._linear
 
+tfprint = lambda x, l: tf.Print(x, [tf.shape(x), x[0][:5], x[0][-5:]], "$"+l, summarize=5)
+# tfprint = lambda x,l : x
+
 def _extract_argmax_and_embed(embedding, output_projection=None,
                               update_embedding=True):
     """Get a loop_function that extracts the previous symbol and embeds it.
@@ -196,7 +199,7 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
         # print("IS", state)
 
         # MODIFIED: return both context vector and attention weights
-        def attention(query):
+        def attention(state, i):
             """Put attention masks on hidden using hidden_features and query."""
             # MODIFIED ADD START
             ss = None  # record attention weights
@@ -204,20 +207,28 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
             ds = []  # Results of attention reads will be stored here.
             for a in xrange(num_heads):
                 with tf.variable_scope("Attention_%d" % a):
-                    y = linear(query, attention_vec_size, True)
+                    y = linear(state, attention_vec_size, True)
                     y = tf.reshape(y, [-1, 1, 1, attention_vec_size])
-                    # print("Y:",y)
-                    # print("HF:",hidden_features[0])
+                    tfprint(y, f"{i}$Y_AP")
+                    tfprint(hidden_features[a], f"{i}$HF")
                     # Attention mask is a softmax of v^T * tanh(...).
-                    s = tf.reduce_sum(v[a] * tf.tanh(hidden_features[a] + y), [2, 3])
+                    hf_y = hidden_features[a] + y
+                    tfprint(hf_y, f"{i}$A_HF_Y")
+                    tfprint(v[a], f"{i}$VT")
+
+                    vhfy = v[a] * tf.tanh(hf_y)
+                    tfprint(vhfy, f"{i}$V_HF_Y")
+                    s = tf.reduce_sum(vhfy, [2, 3])
+                    tfprint(s, f"{i}$E")
                     a = tf.nn.softmax(s)
+                    tfprint(a, f"{i}$ALP")
                     ss = a
-                    # a = tf.Print(a, [a], message="a: ",summarize=30)
                     # Now calculate the attention-weighted vector d.
                     d = tf.reduce_sum(
                         tf.reshape(a, [-1, attn_length, 1, 1]) * hidden,
                         [1, 2]
                     )
+                    tfprint(d, f"{i}$AT_C:")
                     ds.append(tf.reshape(d, [-1, attn_size]))
             # MODIFIED DELETED return ds
             # MODIFIED ADD START
@@ -243,8 +254,6 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
         #     attns, attn_weights = attention(initial_state)
         #     attention_weights_history.append(attn_weights)
         #     # MODIFIED ADD END
-        tfprint = lambda x,l : tf.Print(x,[tf.shape(x),x[0][:5],x[0][-5:]],l,summarize=5)
-        # tfprint = lambda x,l : x
         for i, inp in enumerate(decoder_inputs):
             if i > 0:
                 tf.get_variable_scope().reuse_variables()
@@ -273,18 +282,20 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
             state = tfprint(state,f"{i}$BF_ST:") #512
             cell_output = tfprint(cell_output,f"{i}$C_O:")
             # print(state)
+
+            #CLEAR
             # Run the attention mechanism.
             if i == 0 and initial_state_attention:
                 with tf.variable_scope(tf.get_variable_scope(),
                                        reuse=True):
                     # MODIFIED DELETED attns = attention(state)
                     # MODIFIED ADD START
-                    attns, attn_weights = attention(state)
+                    attns, attn_weights = attention(state, i)
                     # MODIFIED ADD END
             else:
                 # MODIFIED DELETED attns = attention(state)
                 # MODIFIED ADD START
-                attns, attn_weights = attention(state)
+                attns, attn_weights = attention(state, i)
                 attention_weights_history.append(attn_weights)
                 # MODIFIED ADD END
             attns[0] = tfprint(attns[0], f"{i}$ATTNS_A:")
