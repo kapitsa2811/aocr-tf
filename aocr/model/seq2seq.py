@@ -209,26 +209,26 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
                 with tf.variable_scope("Attention_%d" % a):
                     y = linear(state, attention_vec_size, True)
                     y = tf.reshape(y, [-1, 1, 1, attention_vec_size])
-                    tfprint(y, f"{i}$Y_AP")
-                    tfprint(hidden_features[a], f"{i}$HF")
+                    y = tfprint(y, f"{i}$Y_AP")
+                    hidden_features[a] = tfprint(hidden_features[a], f"{i}$HF")
                     # Attention mask is a softmax of v^T * tanh(...).
                     hf_y = hidden_features[a] + y
-                    tfprint(hf_y, f"{i}$A_HF_Y")
-                    tfprint(v[a], f"{i}$VT")
+                    hf_y = tfprint(hf_y, f"{i}$A_HF_Y")
+                    # tfprint(v[0], f"{i}$VT")
 
                     vhfy = v[a] * tf.tanh(hf_y)
-                    tfprint(vhfy, f"{i}$V_HF_Y")
+                    vhfy = tfprint(vhfy, f"{i}$V_HF_Y")
                     s = tf.reduce_sum(vhfy, [2, 3])
-                    tfprint(s, f"{i}$E")
+                    s = tfprint(s, f"{i}$E")
                     a = tf.nn.softmax(s)
-                    tfprint(a, f"{i}$ALP")
+                    a = tfprint(a, f"{i}$ALP")
                     ss = a
                     # Now calculate the attention-weighted vector d.
                     d = tf.reduce_sum(
                         tf.reshape(a, [-1, attn_length, 1, 1]) * hidden,
                         [1, 2]
                     )
-                    tfprint(d, f"{i}$AT_C:")
+                    d = tfprint(d, f"{i}$AT_C:")
                     ds.append(tf.reshape(d, [-1, attn_size]))
             # MODIFIED DELETED return ds
             # MODIFIED ADD START
