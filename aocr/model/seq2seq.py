@@ -192,7 +192,7 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
         for a in xrange(num_heads):
             k = tf.get_variable("AttnW_%d" % a,
                                 [1, 1, attn_size, attention_vec_size])
-            k = tf.Print(k, [hidden[0][5]], "$K", summarize=5)
+            k = tf.Print(k, [k], "$K", summarize=512)
             hidden = tfprint(hidden,'D_HIDDEN')
             conv_d = tf.nn.conv2d(hidden, k, [1, 1, 1, 1], "SAME")
             conv_d = tfprint(conv_d, 'D_CONV')
