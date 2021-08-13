@@ -54,6 +54,7 @@ class Model(object):
         self.max_width = int(math.ceil(max_resized_width))
         self.max_label_length = max_prediction_length
         self.encoder_size = int(math.ceil(1. * self.max_width / 4))
+        print(self.encoder_size, "#ES")
         self.decoder_size = max_prediction_length + 2
         self.buckets = [(self.encoder_size, self.decoder_size)]
 

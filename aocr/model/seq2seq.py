@@ -59,6 +59,7 @@ from __future__ import division
 from __future__ import print_function
 
 # We disable pylint because we need python3 compatibility.
+import numpy as np
 from six.moves import xrange  # pylint: disable=redefined-builtin
 from six.moves import zip     # pylint: disable=redefined-builtin
 
@@ -76,8 +77,8 @@ except AttributeError:
     from tensorflow.contrib.rnn.python.ops import core_rnn_cell
     linear = core_rnn_cell._linear
 
-tfprint = lambda x, l: tf.Print(x, [tf.shape(x), x[0][:5], x[0][-5:]], "$"+l, summarize=5)
-# tfprint = lambda x,l : x
+# tfprint = lambda x, l: tf.Print(x, [tf.shape(x), x[0][:5], x[0][-5:]], "$"+l, summarize=5)
+tfprint = lambda x,l : x
 
 def _extract_argmax_and_embed(embedding, output_projection=None,
                               update_embedding=True):
@@ -183,7 +184,7 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
         attn_size = attention_states.get_shape()[2].value
         # print("ATTN_LEN, ATTN_SIZE:", attn_length, attn_size)   128 512
         # To calculate W1 * h_t we use a 1-by-1 convolution, need to reshape before.
-        hidden = tf.reshape(attention_states, [-1, attn_length, 1, attn_size])
+        hidden = tf.reshape(attention_states, [-1, attn_length, 1, attn_size])   #4 128 1 512
 
         hidden_features = []
         v = []
@@ -191,7 +192,11 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
         for a in xrange(num_heads):
             k = tf.get_variable("AttnW_%d" % a,
                                 [1, 1, attn_size, attention_vec_size])
-            hidden_features.append(tf.nn.conv2d(hidden, k, [1, 1, 1, 1], "SAME"))
+            k = tf.Print(k, [hidden[0][5]], "$K", summarize=5)
+            hidden = tfprint(hidden,'D_HIDDEN')
+            conv_d = tf.nn.conv2d(hidden, k, [1, 1, 1, 1], "SAME")
+            conv_d = tfprint(conv_d, 'D_CONV')
+            hidden_features.append(conv_d)
             v.append(tf.get_variable("AttnV_%d" % a,
                                      [attention_vec_size]))
 
@@ -212,7 +217,7 @@ def attention_decoder(decoder_inputs, initial_state, attention_states, cell,
                     y = tfprint(y, f"{i}$Y_AP")
                     hidden_features[a] = tfprint(hidden_features[a], f"{i}$HF")
                     # Attention mask is a softmax of v^T * tanh(...).
-                    hf_y = hidden_features[a] + y
+                    hf_y = hidden_features[a] + y    #[4 128 1 512] + [4 1 1 512]
                     hf_y = tfprint(hf_y, f"{i}$A_HF_Y")
                     # tfprint(v[0], f"{i}$VT")
 
@@ -589,6 +594,7 @@ def model_with_buckets(encoder_inputs_tensor,labels,  decoder_inputs, targets, b
             bucket_outputs, attention_weights_history = seq2seq(encoder_inputs[:int(bucket[0])],
                                                                 decoder_inputs[:int(bucket[1])],
                                                                 int(bucket[0]))
+            print(int(bucket[0]),"#SL")
             if per_example_loss:
                 loss = sequence_loss_by_example(
                     bucket_outputs, targets[:int(bucket[1])], weights[:int(bucket[1])],labels,batch_size,
