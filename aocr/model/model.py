@@ -54,7 +54,7 @@ class Model(object):
         self.max_width = int(math.ceil(max_resized_width))
         self.max_label_length = max_prediction_length
         self.encoder_size = int(math.ceil(1. * self.max_width / 4))
-        print(self.encoder_size, "#ES")
+        # print(self.encoder_size, "#ES")
         self.decoder_size = max_prediction_length + 2
         self.buckets = [(self.encoder_size, self.decoder_size)]
 
@@ -148,9 +148,9 @@ class Model(object):
 
             cnn_model = CNN(self.img_data, not self.forward_only)
             self.conv_output = cnn_model.tf_output()
-            self.conv_output = tf.Print(self.conv_output,[tf.shape(self.conv_output),self.conv_output],"CONV:",summarize=10)
+            # self.conv_output = tf.Print(self.conv_output,[tf.shape(self.conv_output),self.conv_output],"CONV:",summarize=10)
             self.perm_conv_output = tf.transpose(self.conv_output, perm=[1, 0, 2])
-            self.perm_conv_output = tf.Print(self.perm_conv_output,[tf.shape(self.perm_conv_output),self.perm_conv_output],"PERM_CONV:",summarize=10)
+            # self.perm_conv_output = tf.Print(self.perm_conv_output,[tf.shape(self.perm_conv_output),self.perm_conv_output],"PERM_CONV:",summarize=10)
             self.attention_decoder_model = Seq2SeqModel(
                 encoder_masks=self.encoder_masks,
                 encoder_inputs_tensor=self.perm_conv_output,

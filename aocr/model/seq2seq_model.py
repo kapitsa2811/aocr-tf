@@ -112,15 +112,15 @@ class Seq2SeqModel(object):
                  lstm_fw_cell, lstm_bw_cell, lstm_inputs,
                  initial_state_fw=None, initial_state_bw=None,
                  dtype=tf.float32, sequence_length=None, scope=None)
-            print(pre_encoder_inputs, "#PE")
+            # print(pre_encoder_inputs, "#PE")
             encoder_inputs = [e*f for e, f in zip(pre_encoder_inputs, encoder_masks[:seq_length])]
-            print(encoder_inputs[0], len(encoder_inputs))
+            # print(encoder_inputs[0], len(encoder_inputs))
             top_states = [tf.reshape(e, [-1, 1, num_hidden*2])
                           for e in encoder_inputs]
-            print(top_states[0], len(top_states))
+            # print(top_states[0], len(top_states))
             # print("TS:",top_states[0])
             attention_states = tf.concat(top_states, 1)
-            print(attention_states)
+            # print(attention_states)
 
             # initial_state = tf.concat(axis=1, values=[output_state_fw, output_state_bw])
             initial_state = output_state_fw

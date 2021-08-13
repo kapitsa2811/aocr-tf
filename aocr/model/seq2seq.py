@@ -594,7 +594,7 @@ def model_with_buckets(encoder_inputs_tensor,labels,  decoder_inputs, targets, b
             bucket_outputs, attention_weights_history = seq2seq(encoder_inputs[:int(bucket[0])],
                                                                 decoder_inputs[:int(bucket[1])],
                                                                 int(bucket[0]))
-            print(int(bucket[0]),"#SL")
+            # print(int(bucket[0]),"#SL")
             if per_example_loss:
                 loss = sequence_loss_by_example(
                     bucket_outputs, targets[:int(bucket[1])], weights[:int(bucket[1])],labels,batch_size,
