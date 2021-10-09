@@ -263,7 +263,7 @@ def main(args=None):
                 data_path=parameters.dataset_path,
                 file_id=parameters.file_id
             )
-        elif parameters.phase == 'predict':
+        elif parameters.phase == 'predict': ### 2 ###
             for line in sys.stdin:
                 filename = line.rstrip()
                 try:
