@@ -2,7 +2,7 @@
 ###https://colab.research.google.com/drive/12-hKIzHfUumpnx8a21USey78w_3tLsHu#scrollTo=wwLq2AiN5lLF
 from __future__ import absolute_import
 from __future__ import division
-
+# explore DataGen
 import time
 import os
 import math
@@ -146,17 +146,17 @@ class Model(object):
                 else:
                     self.target_weights.append(tf.tile([0.], [num_images]))
 
-            cnn_model = CNN(self.img_data, not self.forward_only)
+            cnn_model = CNN(self.img_data, not self.forward_only) # what is exatly done here?? is feature map is output?
             self.conv_output = cnn_model.tf_output()
             # self.conv_output = tf.Print(self.conv_output,[tf.shape(self.conv_output),self.conv_output],"CONV:",summarize=10)
-            self.perm_conv_output = tf.transpose(self.conv_output, perm=[1, 0, 2])
+            self.perm_conv_output = tf.transpose(self.conv_output, perm=[1, 0, 2]) # collab 6 i think it is bringing width as a 1st dim
             # self.perm_conv_output = tf.Print(self.perm_conv_output,[tf.shape(self.perm_conv_output),self.perm_conv_output],"PERM_CONV:",summarize=10)
             self.attention_decoder_model = Seq2SeqModel(
-                encoder_masks=self.encoder_masks,
+                encoder_masks=self.encoder_masks, # what is exactly role of masks?
                 encoder_inputs_tensor=self.perm_conv_output,
                 labels=self.labels,
                 decoder_inputs=self.decoder_inputs,
-                target_weights=self.target_weights,
+                target_weights=self.target_weights, # what is role of target weights?
                 batch_size = self.batch_size,
                 target_vocab_size=len(DataGen.CHARMAP),
                 buckets=self.buckets,
@@ -166,7 +166,7 @@ class Model(object):
                 forward_only=self.forward_only,
                 use_gru=use_gru)
 
-            table = tf.contrib.lookup.MutableHashTable(
+            table = tf.contrib.lookup.MutableHashTable( # what is purpose???
                 key_dtype=tf.int64,
                 value_dtype=tf.string,
                 default_value="",
@@ -174,25 +174,25 @@ class Model(object):
             )
 
             insert = table.insert(
-                tf.constant(list(range(len(DataGen.CHARMAP))), dtype=tf.int64),
+                tf.constant(list(range(len(DataGen.CHARMAP))), dtype=tf.int64), # DataGen.CHARMAP check its value
                 tf.constant(DataGen.CHARMAP),
             )
 
-            with tf.control_dependencies([insert]):
+            with tf.control_dependencies([insert]): # tf.control_dependencies calculaytes insert before moving ahead. 
                 num_feed = []
                 prb_feed = []
 
                 for line in xrange(len(self.attention_decoder_model.output)):
                     guess = tf.argmax(self.attention_decoder_model.output[line], axis=1)
-                    proba = tf.reduce_max(
+                    proba = tf.reduce_max(. # this calculate max element location 
                         tf.nn.softmax(self.attention_decoder_model.output[line]), axis=1)
                     num_feed.append(guess)
                     prb_feed.append(proba)
 
-                # Join the predictions into a single output string.
-                trans_output = tf.transpose(num_feed)
+                # Join the predic tions into a single output string. I think below unnecessary complecation is done
+                trans_output = tf.transpose(num_feed) # collab 7
                 trans_output = tf.map_fn(
-                    lambda m: tf.foldr(
+                    lambda m: tf.foldr( #8 collab
                         lambda a, x: tf.cond(
                             tf.equal(x, DataGen.EOS_ID),
                             lambda: '',
@@ -207,7 +207,7 @@ class Model(object):
 
                 # Calculate the total probability of the output string.
                 trans_outprb = tf.transpose(prb_feed)
-                trans_outprb = tf.gather(trans_outprb, tf.range(tf.size(trans_output)))
+                trans_outprb = tf.gather(trans_outprb, tf.range(tf.size(trans_output))) # collab 9 , not working
                 trans_outprb = tf.map_fn(
                     lambda m: tf.foldr(
                         lambda a, x: tf.multiply(tf.cast(x, tf.float64), a),
