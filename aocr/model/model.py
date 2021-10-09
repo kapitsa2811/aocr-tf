@@ -1,5 +1,5 @@
 """Visual Attention Based OCR Model."""
-
+###https://colab.research.google.com/drive/12-hKIzHfUumpnx8a21USey78w_3tLsHu#scrollTo=wwLq2AiN5lLF
 from __future__ import absolute_import
 from __future__ import division
 
@@ -48,15 +48,15 @@ class Model(object):
         self.use_distance = use_distance
 
         # We need resized width, not the actual width
-        max_resized_width = 1. * max_image_width / max_image_height * DataGen.IMAGE_HEIGHT
+        max_resized_width = 1. * max_image_width / max_image_height * DataGen.IMAGE_HEIGHT # 1.main DataGen ?, why it is calculated?? 
         
         self.max_original_width = max_image_width
         self.max_width = int(math.ceil(max_resized_width))
         self.max_label_length = max_prediction_length
-        self.encoder_size = int(math.ceil(1. * self.max_width / 4))
+        self.encoder_size = int(math.ceil(1. * self.max_width / 4)) # encoder decode sizes are calculated from input image, is it possible with test becuase model is frrezed?
         # print(self.encoder_size, "#ES")
-        self.decoder_size = max_prediction_length + 2
-        self.buckets = [(self.encoder_size, self.decoder_size)]
+        self.decoder_size = max_prediction_length + 2     # encoder decode sizes are calculated from input image
+        self.buckets = [(self.encoder_size, self.decoder_size)]. 
 
         if gpu_id >= 0:
             device_id = '/gpu:' + str(gpu_id)
@@ -112,14 +112,14 @@ class Model(object):
 
         with tf.device(device_id):
 
-            self.height = tf.constant(DataGen.IMAGE_HEIGHT, dtype=tf.int32)
+            self.height = tf.constant(DataGen.IMAGE_HEIGHT, dtype=tf.int32). #. What DataGen actually do??
             self.height_float = tf.constant(DataGen.IMAGE_HEIGHT, dtype=tf.float64)
 
-            self.img_pl = tf.placeholder(tf.string, name='input_image_as_bytes')
+            self.img_pl = tf.placeholder(tf.string, name='input_image_as_bytes') # is it image path converted to byte??
             self.labels = tf.placeholder(tf.int32,shape=(self.batch_size, self.max_label_lengthc), name="input_labels_as_bytes")
             #self.label_data = tf.placeholder(tf.string, shape=[None,self.max_label_length], name="input_labels_as_bs")
-            self.img_data = tf.cond(
-                tf.less(tf.rank(self.img_pl), 1),
+            self.img_data = tf.cond(         # not clear about this input format. https://colab.research.google.com/drive/12-hKIzHfUumpnx8a21USey78w_3tLsHu#scrollTo=JGYZUnc74Vh4
+                tf.less(tf.rank(self.img_pl), 1),   # https://www.tensorflow.org/api_docs/python/tf/cond collab 2
                 lambda: tf.expand_dims(self.img_pl, 0),
                 lambda: self.img_pl
             )
