@@ -258,7 +258,7 @@ def main(args=None):
                 data_path=parameters.dataset_path,
                 num_epoch=parameters.num_epoch
             )
-        elif parameters.phase == 'test':
+        elif parameters.phase == 'test': ### 1 ###
             model.test(
                 data_path=parameters.dataset_path,
                 file_id=parameters.file_id
