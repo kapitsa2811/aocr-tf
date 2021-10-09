@@ -123,9 +123,9 @@ class Model(object):
                 lambda: tf.expand_dims(self.img_pl, 0),
                 lambda: self.img_pl
             )
-            self.img_data = tf.map_fn(self._prepare_image, self.img_data, dtype=tf.float32)
-            self.img_data = tf.ones((4,32,512,1))
-            self.img_data = tf.ones_like(self.img_data)
+            self.img_data = tf.map_fn(self._prepare_image, self.img_data, dtype=tf.float32) # collab 3..Transforms img_data by applying self._prepare_image to each element unstacked on axis 0. 
+            self.img_data = tf.ones((4,32,512,1)) 
+            self.img_data = tf.ones_like(self.img_data) #collab 4 https://www.tensorflow.org/api_docs/python/tf/ones_like 
             num_images = tf.shape(self.img_data)[0]
 
             # TODO: create a mask depending on the image/batch size
