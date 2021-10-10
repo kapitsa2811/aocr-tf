@@ -129,7 +129,7 @@ class Model(object):
             num_images = tf.shape(self.img_data)[0]
 
             # TODO: create a mask depending on the image/batch size
-            self.encoder_masks = []
+            self.encoder_masks = [] # not understanding role of self.encoder_masks,self.decoder_inputs,self.target_weights
             for i in xrange(self.encoder_size + 1):
                 self.encoder_masks.append(
                     tf.tile([[1.]], [num_images, 1])
