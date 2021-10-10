@@ -178,13 +178,13 @@ class Model(object):
                 tf.constant(DataGen.CHARMAP),
             )
 
-            with tf.control_dependencies([insert]): # tf.control_dependencies calculaytes insert before moving ahead. 
+            with tf.control_dependencies([insert]): # tf.control_dependencies calculates insert before moving ahead. 
                 num_feed = []
                 prb_feed = []
 
                 for line in xrange(len(self.attention_decoder_model.output)):
                     guess = tf.argmax(self.attention_decoder_model.output[line], axis=1)
-                    proba = tf.reduce_max(. # this calculate max element location 
+                    proba = tf.reduce_max(. # this calculate max element  
                         tf.nn.softmax(self.attention_decoder_model.output[line]), axis=1)
                     num_feed.append(guess)
                     prb_feed.append(proba)
